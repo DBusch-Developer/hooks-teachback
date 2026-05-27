@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>React Hooks — Teach-Back</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e14;
+    --bg-elev: #16161f;
+    --bg-code: #0a0a10;
+    --border: #2a2a38;
+    --border-soft: #1f1f2a;
+    --text: #ece9e0;
+    --text-dim: #9b97a8;
+    --violet: #a78bfa;
+    --violet-soft: #c4b5fd;
+    --violet-deep: #5b21b6;
+    --green: #86efac;
+    --rose: #fca5a5;
+    --amber: #fcd34d;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  body {
+    background-image:
+      radial-gradient(at 15% 10%, rgba(167, 139, 250, 0.08) 0px, transparent 50%),
+      radial-gradient(at 85% 90%, rgba(196, 181, 253, 0.05) 0px, transparent 50%);
+  }
+
+  /* Header */
+  header {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 56px 40px 32px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--violet);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(48px, 7vw, 84px);
+    font-weight: 400;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    margin-bottom: 18px;
+  }
+
+  h1 em {
+    color: var(--violet);
+    font-style: italic;
+  }
+
+  .subtitle {
+    font-size: 17px;
+    color: var(--text-dim);
+    max-width: 640px;
+  }
+
+  .project-badge {
+    display: inline-block;
+    margin-top: 24px;
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .project-badge strong { color: var(--violet-soft); font-weight: 500; }
+
+  /* Nav tabs */
+  nav.tabs {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 40px 0;
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    background: rgba(14, 14, 20, 0.92);
+    backdrop-filter: blur(12px);
+    z-index: 10;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .tab {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+    margin-bottom: -1px;
+  }
+
+  .tab:hover { color: var(--text); }
+
+  .tab.active {
+    color: var(--violet);
+    border-bottom-color: var(--violet);
+  }
+
+  .speaker-toggle {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .speaker-toggle input { accent-color: var(--violet); }
+
+  /* Main */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 48px 40px 120px;
+  }
+
+  section.panel { display: none; }
+  section.panel.active { display: block; animation: fade 0.3s ease; }
+
+  @keyframes fade {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 52px;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+
+  h2 .hook-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 32px;
+    color: var(--violet);
+    background: rgba(167, 139, 250, 0.08);
+    padding: 4px 12px;
+    border-radius: 6px;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+
+  .tagline {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 22px;
+    color: var(--text-dim);
+    margin-bottom: 32px;
+  }
+
+  h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--violet);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+    margin-top: 40px;
+  }
+
+  p { margin-bottom: 16px; max-width: 720px; }
+
+  /* Cards / layout */
+  .split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin: 24px 0;
+  }
+
+  @media (max-width: 880px) {
+    .split { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--bg-elev);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    padding: 24px;
+  }
+
+  .card-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-label::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--violet);
+  }
+
+  .card-label.live::before { background: var(--green); animation: pulse 1.5s infinite; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Code blocks */
+  pre {
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.65;
+  }
+
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.92em; }
+  p code, li code {
+    background: rgba(167, 139, 250, 0.1);
+    color: var(--violet-soft);
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+
+  /* Syntax tokens */
+  .kw { color: #c084fc; }
+  .str { color: #86efac; }
+  .fn { color: #93c5fd; }
+  .var { color: #fcd34d; }
+  .com { color: #6b7280; font-style: italic; }
+  .pun { color: #9ca3af; }
+
+  .file-path {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .file-path span { color: var(--violet-soft); }
+
+  /* Demo controls */
+  .demo {
+    text-align: center;
+    padding: 24px 0;
+  }
+
+  .counter-display {
+    font-family: 'Instrument Serif', serif;
+    font-size: 96px;
+    color: var(--violet);
+    line-height: 1;
+    margin-bottom: 24px;
+  }
+
+  .btn {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin: 4px;
+  }
+
+  .btn:hover {
+    border-color: var(--violet);
+    color: var(--violet);
+  }
+
+  .btn-primary {
+    background: var(--violet);
+    color: var(--bg);
+    border-color: var(--violet);
+  }
+
+  .btn-primary:hover {
+    background: var(--violet-soft);
+    color: var(--bg);
+  }
+
+  .toggle-display {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+  }
+
+  .toggle-display.on { background: rgba(134, 239, 172, 0.1); color: var(--green); border-color: var(--green); }
+  .toggle-display.off { background: rgba(252, 165, 165, 0.08); color: var(--rose); border-color: var(--rose); }
+
+  /* Effect log */
+  .effect-log {
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+    height: 200px;
+    overflow-y: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    text-align: left;
+    margin-top: 16px;
+  }
+
+  .effect-log .entry {
+    margin-bottom: 4px;
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .effect-log .entry::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--violet);
+  }
+
+  .effect-log .entry.mount { color: var(--green); }
+  .effect-log .entry.dep { color: var(--amber); }
+  .effect-log .entry.every { color: var(--rose); }
+  .effect-log .entry.render { color: var(--text-dim); }
+
+  .controls-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin: 16px 0;
+  }
+
+  .input-text {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    width: 200px;
+  }
+
+  .input-text:focus { outline: none; border-color: var(--violet); }
+
+  /* Speaker notes */
+  .speaker-notes {
+    display: none;
+    background: rgba(167, 139, 250, 0.06);
+    border-left: 3px solid var(--violet);
+    padding: 20px 24px;
+    margin: 24px 0;
+    border-radius: 0 6px 6px 0;
+  }
+
+  body.show-notes .speaker-notes { display: block; }
+
+  .speaker-notes h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--violet);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+
+  .speaker-notes ul { margin-left: 18px; }
+  .speaker-notes li { margin-bottom: 8px; color: var(--text); }
+
+  /* Rules list */
+  .rule {
+    background: var(--bg-elev);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .rule-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 48px;
+    color: var(--violet);
+    line-height: 1;
+    min-width: 50px;
+  }
+
+  .rule-content h4 {
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    margin-bottom: 6px;
+  }
+
+  .rule-content p { font-size: 14px; color: var(--text-dim); margin: 0; }
+
+  /* Three-mode useEffect viz */
+  .mode-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 16px 0;
+  }
+
+  @media (max-width: 720px) { .mode-grid { grid-template-columns: 1fr; } }
+
+  .mode {
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+
+  .mode-title {
+    font-size: 11px;
+    color: var(--violet);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+
+  .mode-code { color: var(--text); margin-bottom: 10px; }
+  .mode-when { color: var(--text-dim); font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.5; }
+
+  hr.divider {
+    border: none;
+    border-top: 1px solid var(--border-soft);
+    margin: 48px 0;
+  }
+
+  footer {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 40px 60px;
+    border-top: 1px solid var(--border-soft);
+    color: var(--text-dim);
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    text-align: center;
+  }
+
+  footer span { color: var(--violet); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">// Teach-Back · React</div>
+  <h1>Hooks, in <em>plain English.</em></h1>
+  <p class="subtitle">A walk through the React hooks I used to build a real project — what they are, what they do, and the actual code I wrote with them.</p>
+  <div class="project-badge">Project: <strong>Build-A-Beast</strong> — project tracker · React + Redux + React Router</div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab active" data-tab="intro">intro</button>
+  <button class="tab" data-tab="useState">useState</button>
+  <button class="tab" data-tab="useEffect">useEffect</button>
+  <button class="tab" data-tab="useContext">useContext</button>
+  <button class="tab" data-tab="useReducer">useReducer</button>
+  <button class="tab" data-tab="useRef">useRef</button>
+  <button class="tab" data-tab="useMemo">useMemo</button>
+  <button class="tab" data-tab="useCallback">useCallback</button>
+  <button class="tab" data-tab="custom">custom hooks</button>
+  <button class="tab" data-tab="router">router</button>
+  <button class="tab" data-tab="redux">redux</button>
+  <button class="tab" data-tab="rules">rules</button>
+  <label class="speaker-toggle">
+    <input type="checkbox" id="notesToggle">
+    speaker notes
+  </label>
+</nav>
+
+<main>
+
+<!-- ========== INTRO ========== -->
+<section class="panel active" id="intro">
+  <h2>What is a hook?</h2>
+  <p class="tagline">A function that lets you "hook into" React features from inside a regular function component.</p>
+
+  <p>Before hooks, if you wanted your component to <em>remember things</em> or <em>do things when stuff changed</em>, you had to write a class. Hooks took those features and moved them into plain functions.</p>
+
+  <div class="split">
+    <div class="card">
+      <div class="card-label">The pattern</div>
+      <p style="margin:0;">A hook is just a function whose name starts with <code>use</code>. You call it at the top of your component, and React keeps track of the rest.</p>
+    </div>
+    <div class="card">
+      <div class="card-label">What I'll cover</div>
+      <p style="margin:0;"><code>useState</code> · <code>useEffect</code> — the everyday ones<br>
+      <code>useContext</code> · <code>useReducer</code> — for bigger state<br>
+      <code>useRef</code> — for DOM refs and non-state values<br>
+      <code>useMemo</code> · <code>useCallback</code> — for performance<br>
+      <code>useParams</code> · <code>useNavigate</code> — from React Router<br>
+      <code>useSelector</code> · <code>useDispatch</code> — from React Redux<br>
+      Custom hooks — write your own</p>
+    </div>
+  </div>
+
+  <div class="speaker-notes">
+    <h4>Talking points</h4>
+    <ul>
+      <li>Hooks were added in React 16.8 (2019). Before that, anything stateful needed a class component.</li>
+      <li>The "use" prefix is mandatory — it's how React (and the linter) know it's a hook.</li>
+      <li>I'll show real code from my Build-A-Beast project for each one.</li>
+      <li>If anyone asks "why hooks instead of classes?" — they let you reuse stateful logic, the code is shorter, and you don't have to worry about <code>this</code>.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ========== useState ========== -->
+<section class="panel" id="useState">
+  <h2><span class="hook-name">useState</span></h2>
+  <p class="tagline">Lets your component remember something between renders.</p>
+
+  <p>You give it a starting value. It gives you back the current value plus a function to update it. When you call the update function, React re-renders the component with the new value.</p>
+
+  <pre><span class="kw">const</span> [<span class="var">value</span>, <span class="fn">setValue</span>] = <span class="fn">useState</span>(<span class="str">initialValue</span>);</pre>
+
+  <h3>Live demo</h3>
+  <div class="split">
+    <div class="card">
+      <div class="card-label live">Counter</div>
+      <div class="demo">
+        <div class="counter-display" id="counterValue">0</div>
+        <div class="controls-row">
+          <button class="btn" onclick="counter--; render()">−</button>
+          <button class="btn btn-primary" onclick="counter++; render()">+</button>
+          <button class="btn" onclick="counter = 0; render()">reset</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">What's happening</div>
+<pre><span class="kw">const</span> [<span class="var">count</span>, <span class="fn">setCount</span>] = <span class="fn">useState</span>(<span class="str">0</span>);
+
+<span class="com">// click +</span>
+<span class="fn">setCount</span>(<span class="var">count</span> + <span class="str">1</span>);
+<span class="com">// React re-renders, count is now 1</span></pre>
+      <p style="font-size:13px; color:var(--text-dim); margin-top:14px;">Same idea as the demo on the left. The number on screen <em>is</em> the state. Click a button, state changes, React re-paints.</p>
+    </div>
+  </div>
+
+  <h3>From my project — login form</h3>
+  <span class="file-path">client/src/pages/<span>Login.jsx</span></span>
+<pre><span class="kw">const</span> [<span class="var">loginForm</span>, <span class="fn">setLoginForm</span>] = <span class="fn">useState</span>({ <span class="var">email</span>: <span class="str">""</span>, <span class="var">password</span>: <span class="str">""</span> });
+
+<span class="com">// inside the input...</span>
+&lt;<span class="kw">input</span>
+  value={<span class="var">loginForm</span>.<span class="var">email</span>}
+  onChange={(e) =&gt;
+    <span class="fn">setLoginForm</span>({ ...<span class="var">loginForm</span>, <span class="var">email</span>: e.<span class="var">target</span>.<span class="var">value</span> })
+  }
+/&gt;</pre>
+  <p>Two things to notice: (1) the state is an <em>object</em>, not just a string. (2) When I update it I spread the old state first (<code>...loginForm</code>) so I don't wipe out the password when I'm only changing email.</p>
+
+  <h3>From my project — modal toggle</h3>
+  <span class="file-path">client/src/components/<span>NewProject.jsx</span></span>
+<pre><span class="kw">const</span> [<span class="var">showModal</span>, <span class="fn">setShowModal</span>] = <span class="fn">useState</span>(<span class="kw">false</span>);
+
+<span class="com">// when the user clicks the "+ New Project" button</span>
+&lt;<span class="kw">button</span> onClick={() =&gt; <span class="fn">setShowModal</span>(!<span class="var">showModal</span>)}&gt;
+  New Project
+&lt;/<span class="kw">button</span>&gt;</pre>
+
+  <div class="split">
+    <div class="card">
+      <div class="card-label live">Same pattern, live</div>
+      <div class="demo">
+        <div class="toggle-display off" id="toggleDisplay">showModal: false</div>
+        <br>
+        <button class="btn btn-primary" id="toggleBtn">toggle</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">The trick</div>
+      <p style="margin:0;">A boolean in state is the cleanest way to show/hide anything — modals, dropdowns, edit forms. The variable name reads like English in your JSX: <code>{showModal && &lt;Modal/&gt;}</code>.</p>
+    </div>
+  </div>
+
+  <div class="speaker-notes">
+    <h4>Talking points</h4>
+    <ul>
+      <li>State can be anything — a number, a string, a boolean, an object, an array.</li>
+      <li>You <strong>never</strong> mutate state directly. <code>loginForm.email = "x"</code> won't trigger a re-render. You always call the setter.</li>
+      <li>When state is an object, spread the old state so you only update the field you want.</li>
+      <li>Every component that calls <code>useState</code> gets its own copy — two of the same component on the page have independent state.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ========== useEffect ========== -->
+<section class="panel" id="useEffect">
+  <h2><span class="hook-name">useEffect</span></h2>
+  <p class="tagline">Lets your component do something outside of rendering — fetch data, set up a subscription, sync to something external.</p>
+
+  <p>Rendering should be predictable. Anything that <em>isn't</em> just turning state into UI — calling an API, reading from storage, navigating — goes inside <code>useEffect</code>.</p>
+
+  <pre><span class="fn">useEffect</span>(() =&gt; {
+  <span class="com">// the effect</span>
+}, [<span class="var">dependencies</span>]);</pre>
+
+  <h3>Three modes — based on the dependency array</h3>
+  <div class="mode-grid">
+    <div class="mode">
+      <div class="mode-title">no array</div>
+      <div class="mode-code"><span class="fn">useEffect</span>(() =&gt; {...})</div>
+      <div class="mode-when">Runs after <em>every</em> render. Usually a mistake — easy way to make an infinite loop.</div>
+    </div>
+    <div class="mode">
+      <div class="mode-title">empty []</div>
+      <div class="mode-code"><span class="fn">useEffect</span>(() =&gt; {...}, [])</div>
+      <div class="mode-when">Runs <em>once</em>, when the component first mounts. Good for initial data fetches.</div>
+    </div>
+    <div class="mode">
+      <div class="mode-title">[someValue]</div>
+      <div class="mode-code"><span class="fn">useEffect</span>(() =&gt; {...}, [x])</div>
+      <div class="mode-when">Runs on mount, then again any time <code>x</code> changes. Good for reacting to state.</div>
+    </div>
+  </div>
+
+  <h3>Watch it happen</h3>
+  <div class="split">
+    <div class="card">
+      <div class="card-label live">Effect log</div>
+      <div class="demo">
+        <input type="text" class="input-text" id="effectInput" placeholder="type to change state">
+        <div class="controls-row">
+          <button class="btn btn-primary" id="forceRender">force re-render</button>
+          <button class="btn" id="clearLog">clear</button>
+        </div>
+        <div class="effect-log" id="effectLog"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">The three effects running</div>
+<pre><span class="fn">useEffect</span>(() =&gt; {
+  <span class="com">// runs every render</span>
+});
+
+<span class="fn">useEffect</span>(() =&gt; {
+  <span class="com">// runs once on mount</span>
+}, []);
+
+<span class="fn">useEffect</span>(() =&gt; {
+  <span class="com">// runs when input changes</span>
+}, [<span class="var">input</span>]);</pre>
+      <p style="font-size:13px; color:var(--text-dim); margin-top:12px;">Type in the box. The log shows which effects "fired." The third one only fires when the typed value actually changes.</p>
+    </div>
+  </div>
+
+  <h3>From my project — fetch on mount</h3>
+  <span class="file-path">client/src/pages/<span>ProjectDetail.jsx</span></span>
+<pre><span class="kw">const</span> { <span class="var">projectId</span> } = <span class="fn">useParams</span>();
+
+<span class="fn">useEffect</span>(() =&gt; {
+  <span class="fn">dispatch</span>(<span class="fn">projectGetOne</span>(<span class="var">projectId</span>));
+}, []);</pre>
+  <p>The detail page mounts → fetch this one project's data from the backend. Empty array means "do this once and then stop."</p>
+
+  <h3>From my project — react to a state change</h3>
+  <span class="file-path">client/src/pages/<span>Login.jsx</span></span>
+<pre><span class="fn">useEffect</span>(() =&gt; {
+  <span class="kw">if</span> (<span class="var">isLoggedIn</span> && <span class="var">user</span>.<span class="var">token</span>) {
+    <span class="fn">navigate</span>(<span class="str">"/"</span>);
+  }
+}, [<span class="var">isLoggedIn</span>]);</pre>
+  <p>When the user submits the login form, Redux flips <code>isLoggedIn</code> to true. This effect notices, and sends them to the home page. Without the dependency, this would never know to run.</p>
+
+  <h3>From my project — sync local state to Redux</h3>
+  <span class="file-path">client/src/components/<span>ProjectEdit.jsx</span></span>
+<pre><span class="fn">useEffect</span>(() =&gt; {
+  <span class="kw">if</span> (<span class="var">project</span>.<span class="var">projectName</span> !== <span class="str">""</span>) {
+    <span class="fn">setProjectEdit</span>(<span class="var">project</span>);
+  }
+}, [<span class="var">project</span>]);</pre>
+  <p>When the project data loads from Redux, copy it into the local edit form state so the inputs show the current values. Then the user can edit without touching Redux until they hit save.</p>
+
+  <div class="speaker-notes">
+    <h4>Talking points</h4>
+    <ul>
+      <li>The dependency array is the most important part. Wrong dependencies = stale data or infinite loops.</li>
+      <li>The linter warns if you reference something inside the effect that isn't in the deps array. Listen to it.</li>
+      <li>The function returned from useEffect (if you return one) runs <em>cleanup</em> — useful for unsubscribing, clearing timers.</li>
+      <li>If anyone asks about infinite loops: it happens when the effect updates state that's in its own dependency array. Update → re-render → effect runs → update → forever.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ========== useContext ========== -->
+<section class="panel" id="useContext">
+  <h2><span class="hook-name">useContext</span></h2>
+  <p class="tagline">Pass data through your component tree without sending it as props at every level.</p>
+
+  <p>When a lot of components need the same data — the logged-in user, a theme, a language preference — you can stop drilling it through every prop and put it in a Context instead. Any component inside the Provider can grab it directly.</p>
+
+  <pre><span class="kw">const</span> <span class="var">UserContext</span> = <span class="fn">createContext</span>();
+
+<span class="com">// at the top of the tree</span>
+&lt;<span class="var">UserContext</span>.<span class="var">Provider</span> value={<span class="var">user</span>}&gt;
+  &lt;<span class="kw">App</span> /&gt;
+&lt;/<span class="var">UserContext</span>.<span class="var">Provider</span>&gt;
+
+<span class="com">// anywhere inside</span>
+<span class="kw">const</span> <span class="var">user</span> = <span class="fn">useContext</span>(<span class="var">UserContext</span>);</pre>
+
+  <h3>What I actually did</h3>
+  <p>In Build-A-Beast I used Redux for the logged-in user. Almost every component does this:</p>
+<pre><span class="kw">const</span> { <span class="var">user</span> } = <span class="fn">useSelector</span>((<span class="var">state</span>) =&gt; <span class="var">state</span>.<span class="var">auth</span>);</pre>
+
+  <h3>What I <em>could</em> have done with Context</h3>
+<pre><span class="com">// in App.jsx</span>
+<span class="kw">export const</span> <span class="var">UserContext</span> = <span class="fn">createContext</span>(<span class="kw">null</span>);
+
+&lt;<span class="var">UserContext</span>.<span class="var">Provider</span> value={<span class="var">user</span>}&gt;
+  &lt;<span class="kw">Routes</span>&gt;...&lt;/<span class="kw">Routes</span>&gt;
+&lt;/<span class="var">UserContext</span>.<span class="var">Provider</span>&gt;
+
+<span class="com">// in NewProject.jsx — no more useSelector for user</span>
+<span class="kw">const</span> <span class="var">user</span> = <span class="fn">useContext</span>(<span class="var">UserContext</span>);
+
+{<span class="var">user</span>.<span class="var">roles</span>.<span class="fn">includes</span>(<span class="str">"Project Manager"</span>) &amp;&amp; (...)}</pre>
+
+  <h3>Context vs Redux</h3>
+  <div class="split">
+    <div class="card">
+      <div class="card-label">Context is for</div>
+      <p style="margin:0; font-size:14px;">Stuff that rarely changes — current user, theme, language. Read-heavy, write-light. Comes with React, zero setup.</p>
+    </div>
+    <div class="card">
+      <div class="card-label">Redux is for</div>
+      <p style="margin:0; font-size:14px;">Lots of related state with frequent updates and async logic. Dev tools, middleware, time-travel debugging. Worth the setup for an app like Build-A-Beast.</p>
+    </div>
+  </div>
+
+  <h3>Another example — theme toggle</h3>
+  <p>This is the classic Context use case. Every styled component on every page needs to know the current theme. You'd never prop-drill <code>theme</code> through 40 components, and it's not really app state — it's UI configuration. Read-heavy, write-light, needed everywhere.</p>
+
+<pre><span class="com">// ThemeContext.jsx</span>
+<span class="kw">import</span> { <span class="var">createContext</span>, <span class="var">useContext</span>, <span class="var">useState</span> } <span class="kw">from</span> <span class="str">"react"</span>;
+
+<span class="kw">const</span> <span class="var">ThemeContext</span> = <span class="fn">createContext</span>();
+
+<span class="kw">export function</span> <span class="fn">ThemeProvider</span>({ <span class="var">children</span> }) {
+  <span class="kw">const</span> [<span class="var">theme</span>, <span class="fn">setTheme</span>] = <span class="fn">useState</span>(<span class="str">"dark"</span>);
+  <span class="kw">const</span> <span class="fn">toggleTheme</span> = () =&gt;
+    <span class="fn">setTheme</span>(<span class="var">t</span> =&gt; <span class="var">t</span> === <span class="str">"dark"</span> ? <span class="str">"light"</span> : <span class="str">"dark"</span>);
+
+  <span class="kw">return</span> (
+    &lt;<span class="var">ThemeContext</span>.<span class="var">Provider</span> value={{ <span class="var">theme</span>, <span class="fn">toggleTheme</span> }}&gt;
+      {<span class="var">children</span>}
+    &lt;/<span class="var">ThemeContext</span>.<span class="var">Provider</span>&gt;
+  );
+}
+
+<span class="com">// custom hook for cleaner consumption</span>
+<span class="kw">export function</span> <span class="fn">useTheme</span>() {
+  <span class="kw">return</span> <span class="fn">useContext</span>(<span class="var">ThemeContext</span>);
+}</pre>
+
+  <p>Wrap the app once:</p>
+
+<pre><span class="com">// App.jsx</span>
+&lt;<span class="kw">ThemeProvider</span>&gt;
+  &lt;<span class="kw">Routes</span>&gt;...&lt;/<span class="kw">Routes</span>&gt;
+&lt;/<span class="kw">ThemeProvider</span>&gt;</pre>
+
+  <p>Then any component can read it or flip it:</p>
+
+<pre><span class="com">// Navbar.jsx — the toggle button</span>
+<span class="kw">const</span> { <span class="var">theme</span>, <span class="fn">toggleTheme</span> } = <span class="fn">useTheme</span>();
+
+&lt;<span class="kw">button</span> onClick={<span class="fn">toggleTheme</span>}&gt;
+  {<span class="var">theme</span> === <span class="str">"dark"</span> ? <span class="str">"☀️"</span> : <span class="str">"🌙"</span>}
+&lt;/<span class="kw">button</span>&gt;
+
+<span class="com">// any other component, anywhere in the tree</span>
+<span class="kw">const</span> { <span class="var">theme</span> } = <span class="fn">useTheme</span>();</pre>
+
+  <p>Two things worth pointing out: the Context value can be an <em>object</em> with both the value and the function to change it (so consumers can read <em>and</em> write), and that <code>useTheme()</code> wrapper is a custom hook that hides the <code>useContext</code> boilerplate — a really common pattern you'll see in production code.</p>
+
+  <div class="speaker-notes">
+    <h4>Talking points</h4>
+    <ul>
+      <li>The choice between Context and Redux is real — Context isn't always the wrong call, and Redux isn't always the right one.</li>
+      <li>Context re-renders every consumer when the value changes. For frequently-updating state that hurts.</li>
+      <li>You can have many Contexts in one app — UserContext, ThemeContext, LocaleContext, etc.</li>
+      <li>Theme is the textbook example because it's read-heavy, write-light, and needed everywhere. Perfect fit.</li>
+      <li>The Provider component uses <code>useState</code> internally — Context isn't a replacement for state, it's how you <em>share</em> state.</li>
+      <li>If anyone asks "why not always use Redux?" — Redux adds boilerplate. For a small app, Context is enough.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ========== useReducer ========== -->
+<section class="panel" id="useReducer">
+  <h2><span class="hook-name">useReducer</span></h2>
+  <p class="tagline">Like useState, but for state with lots of moving parts.</p>
+
+  <p>When state gets complex — multiple fields, nested objects, related changes — <code>useReducer</code> moves the update logic out of your JSX and into one place. You <em>dispatch actions</em> and a <em>reducer function</em> decides how state changes.</p>
+
+  <pre><span class="kw">const</span> [<span class="var">state</span>, <span class="var">dispatch</span>] = <span class="fn">useReducer</span>(<span class="var">reducer</span>, <span class="var">initialState</span>);
+
+<span class="kw">function</span> <span class="fn">reducer</span>(<span class="var">state</span>, <span class="var">action</span>) {
+  <span class="kw">switch</span> (<span class="var">action</span>.<span class="var">type</span>) {
+    <span class="kw">case</span> <span class="str">'INCREMENT'</span>: <span class="kw">return</span> { ...<span class="var">state</span>, <span class="var">count</span>: <span class="var">state</span>.<span class="var">count</span> + <span class="str">1</span> };
+    <span class="kw">case</span> <span class="str">'RESET'</span>:     <span class="kw">return</span> <span class="var">initialState</span>;
+    <span class="kw">default</span>:           <span class="kw">return</span> <span class="var">state</span>;
+  }
+}
+
+<span class="fn">dispatch</span>({ <span class="var">type</span>: <span class="str">'INCREMENT'</span> });</pre>
+
+  <h3>Live demo — same counter, reducer version</h3>
+  <div class="split">
+    <div class="card">
+      <div class="card-label live">Counter (via reducer)</div>
+      <div class="demo">
+        <div class="counter-display" id="reducerValue">0</div>
+        <div class="controls-row">
+          <button class="btn" id="rDec">dispatch DECREMENT</button>
+          <button class="btn btn-primary" id="rInc">dispatch INCREMENT</button>
+          <button class="btn" id="rReset">dispatch RESET</button>
+        </div>
+        <div class="effect-log" id="reducerLog" style="height:120px;"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">The reducer</div>
+<pre><span class="kw">function</span> <span class="fn">reducer</span>(<span class="var">state</span>, <span class="var">action</span>) {
+  <span class="kw">switch</span> (<span class="var">action</span>.<span class="var">type</span>) {
+    <span class="kw">case</span> <span class="str">'INCREMENT'</span>:
+      <span class="kw">return</span> { <span class="var">count</span>: <span class="var">state</span>.<span class="var">count</span> + <span class="str">1</span> };
+    <span class="kw">case</span> <span class="str">'DECREMENT'</span>:
+      <span class="kw">return</span> { <span class="var">count</span>: <span class="var">state</span>.<span class="var">count</span> - <span class="str">1</span> };
+    <span class="kw">case</span> <span class="str">'RESET'</span>:
+      <span class="kw">return</span> { <span class="var">count</span>: <span class="str">0</span> };
+  }
+}</pre>
+    </div>
+  </div>
+
+  <h3>What I actually did</h3>
+  <span class="file-path">client/src/components/<span>NewProject.jsx</span></span>
+  <p>My new-project form had a giant nested state object. Every input did this:</p>
+<pre><span class="kw">const</span> [<span class="var">project</span>, <span class="fn">setProject</span>] = <span class="fn">useState</span>({
+  <span class="var">projectName</span>: <span class="str">""</span>,
+  <span class="var">projectDescription</span>: <span class="str">""</span>,
+  <span class="var">customer</span>: { <span class="var">customerName</span>: <span class="str">""</span>, <span class="var">customerEmail</span>: <span class="str">""</span> },
+  <span class="var">roles</span>: [],
+  <span class="com">// ...and on</span>
+});
+
+<span class="com">// every onChange did this:</span>
+<span class="fn">setProject</span>({ ...<span class="var">project</span>, <span class="var">projectName</span>: e.<span class="var">target</span>.<span class="var">value</span> });</pre>
+
+  <h3>What I <em>could</em> have done with useReducer</h3>
+<pre><span class="kw">function</span> <span class="fn">projectReducer</span>(<span class="var">state</span>, <span class="var">action</span>) {
+  <span class="kw">switch</span> (<span class="var">action</span>.<span class="var">type</span>) {
+    <span class="kw">case</span> <span class="str">'SET_FIELD'</span>:
+      <span class="kw">return</span> { ...<span class="var">state</span>, [<span class="var">action</span>.<span class="var">field</span>]: <span class="var">action</span>.<span class="var">value</span> };
+    <span class="kw">case</span> <span class="str">'SET_CUSTOMER'</span>:
+      <span class="kw">return</span> { ...<span class="var">state</span>, <span class="var">customer</span>: { ...<span class="var">state</span>.<span class="var">customer</span>, [<span class="var">action</span>.<span class="var">field</span>]: <span class="var">action</span>.<span class="var">value</span> } };
+    <span class="kw">case</span> <span class="str">'ADD_ROLE'</span>:
+      <span class="kw">return</span> { ...<span class="var">state</span>, <span class="var">roles</span>: [...<span class="var">state</span>.<span class="var">roles</span>, <span class="var">action</span>.<span class="var">role</span>] };
+    <span class="kw">case</span> <span class="str">'RESET'</span>:
+      <span class="kw">return</span> <span class="var">initialProject</span>;
+    <span class="kw">default</span>: <span class="kw">return</span> <span class="var">state</span>;
+  }
+}
+
+<span class="kw">const</span> [<span class="var">project</span>, <span class="var">dispatch</span>] = <span class="fn">useReducer</span>(<span class="fn">projectReducer</span>, <span class="var">initialProject</span>);
+
+<span class="com">// in JSX</span>
+&lt;<span class="kw">input</span>
+  onChange={(e) =&gt; <span class="fn">dispatch</span>({ <span class="var">type</span>: <span class="str">'SET_FIELD'</span>, <span class="var">field</span>: <span class="str">'projectName'</span>, <span class="var">value</span>: e.<span class="var">target</span>.<span class="var">value</span> })}
+/&gt;</pre>
+  <p>All the spread-and-update logic moves into one place. JSX just says <em>what happened</em>, the reducer says <em>what to do about it</em>.</p>
+
+  <div class="speaker-notes">
+    <h4>Talking points</h4>
+    <ul>
+      <li>If that pattern looked familiar — yes, Redux is basically <code>useReducer</code> scaled up to the whole app, with extra tooling.</li>
+      <li>Rule of thumb: if you have 3+ pieces of state that change together, consider <code>useReducer</code>.</li>
+      <li>The reducer must be pure — same input, same output, no side effects. State updates happen by returning new objects, never mutating.</li>
+      <li>Action objects can be anything — <code>{ type: 'X' }</code>, <code>{ type: 'X', payload: ... }</code>, etc. Convention is <code>type</code> + whatever fields you need.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ========== useRef ========== -->
+<section class="panel" id="useRef">
+  <h2><span class="hook-name">useRef</span></h2>
+  <p class="tagline">Two jobs: grab a real DOM element, or hold a value that doesn't trigger re-renders.</p>
+
+  <p>Most of the time you want React to manage everything. But sometimes you need to talk to a DOM element directly — focus an input, scroll to a position, measure a div. <code>useRef</code> gives you a stable handle to it. The <code>.current</code> property is mutable and persists across renders.</p>
+
+  <pre><span class="kw">const</span> <span class="var">inputRef</span> = <span class="fn">useRef</span>(<span class="kw">null</span>);
+
+&lt;<span class="kw">input</span> ref={<span class="var">inputRef</span>} /&gt;
+
+<span class="com">// later</span>
+<span class="var">inputRef</span>.<span class="var">current</span>.<span class="fn">focus</span>();</pre>
+
+  <h3>Live demo — autofocus</h3>
+  <div class="split">
+    <div class="card">
+      <div class="card-label live">Click the button → input gets focused</div>
+      <div class="demo">
+        <input type="text" class="input-text" id="refInput" placeholder="not focused yet">
+        <div class="controls-row">
+          <button class="btn btn-primary" id="focusBtn">focus the input</button>
+          <button class="btn" id="clearInput">clear it</button>
+        </div>
+        <p style="font-size:13px; color:var(--text-dim); margin-top:14px;">The button doesn't manage state. It just reaches in and calls <code>.focus()</code> on the ref.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">The code</div>
+<pre><span class="kw">const</span> <span class="var">inputRef</span> = <span class="fn">useRef</span>(<span class="kw">null</span>);
+
+<span class="kw">const</span> <span class="fn">handleClick</span> = () =&gt; {
+  <span class="var">inputRef</span>.<span class="var">current</span>.<span class="fn">focus</span>();
+};
+
+&lt;<span class="kw">input</span> ref={<span class="var">inputRef</span>} /&gt;
+&lt;<span class="kw">button</span> onClick={<span class="fn">handleClick</span>}&gt;focus&lt;/<span class="kw">button</span>&gt;</pre>
+    </div>
+  </div>
+
+  <h3>What I <em>could</em> have done in my project</h3>
+  <span class="file-path">client/src/pages/<span>Login.jsx</span></span>
+  <p>Auto-focus the email input when the page loads, so the user can just start typing:</p>
+<pre><span class="kw">const</span> <span class="var">emailRef</span> = <span class="fn">useRef</span>(<span class="kw">null</span>);
+
+<span class="fn">useEffect</span>(() =&gt; {
+  <span class="var">emailRef</span>.<span class="var">current</span>?.<span class="fn">focus</span>();
+}, []);
+
+&lt;<span class="kw">input</span>
+  ref={<span class="var">emailRef</span>}
+  type=<span class="str">"email"</span>
+  value={<span class="var">loginForm</span>.<span class="var">email</span>}
+  onChange={...}
+/&gt;</pre>
+  <p>Small touch, big UX win. The same pattern works for modals — focus the first field when the new-project modal opens.</p>
+
+  <h3>The second use — holding values without re-rendering</h3>
+  <p>Refs aren't just for DOM elements. You can stick anything in <code>.current</code> and it persists across renders without triggering one. Useful for storing a timer ID, a previous value, or a count of something you don't want to display.</p>
+
+  <pre><span class="kw">const</span> <span class="var">renderCount</span> = <span class="fn">useRef</span>(<span class="str">0</span>);
+<span class="var">renderCount</span>.<span class="var">current</span>++;
+<span class="com">// changes but doesn't cause a re-render</span></pre>
+
+  <div class="speaker-notes">
+    <h4>Talking points</h4>
+    <ul>
+      <li>Don't use refs to do things React should do. If you're reading state from a ref or manually editing the DOM that React owns, you probably want regular state.</li>
+      <li>Refs are <em>escape hatches</em>. Use them when the React way doesn't fit.</li>
+      <li>The <code>?.</code> in <code>emailRef.current?.focus()</code> is a safety check — the ref is null on the very first render before the element exists.</li>
+      <li>Changing <code>.current</code> never re-renders. That's the whole point.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ========== useMemo ========== -->
+<section class="panel" id="useMemo">
+  <h2><span class="hook-name">useMemo</span></h2>
+  <p class="tagline">Cache the result of an expensive calculation so it doesn't re-run on every render.</p>
+
+  <p>Every time a component renders, all the code in it runs. Usually fine. But if you've got something slow — sorting a big list, computing aggregates, filtering thousands of items — <code>useMemo</code> remembers the result and only re-runs the calculation when its inputs change.</p>
+
+  <pre><span class="kw">const</span> <span class="var">result</span> = <span class="fn">useMemo</span>(() =&gt; <span class="fn">expensiveCalc</span>(<span class="var">items</span>), [<span class="var">items</span>]);</pre>
+
+  <h3>What I actually did</h3>
+  <span class="file-path">client/src/pages/<span>Tasks.jsx</span></span>
+  <p>I filtered projects inside the JSX every render:</p>
+<pre>{<span class="var">projects</span>
+  .<span class="fn">filter</span>((<span class="var">project</span>) =&gt; <span class="var">project</span>.<span class="var">projectName</span> == <span class="var">selectedOption</span>)
+  .<span class="fn">map</span>((<span class="var">project</span>) =&gt; (...))}</pre>
+  <p>Works fine for a few projects. With a few thousand it'd be wasteful — re-filtering every time anything in the component re-renders.</p>
+
+  <h3>What I <em>could</em> have done with useMemo</h3>
+<pre><span class="kw">const</span> <span class="var">filteredProjects</span> = <span class="fn">useMemo</span>(
+  () =&gt; <span class="var">projects</span>.<span class="fn">filter</span>((<span class="var">p</span>) =&gt; <span class="var">p</span>.<span class="var">projectName</span> === <span class="var">selectedOption</span>),
+  [<span class="var">projects</span>, <span class="var">selectedOption</span>]
+);
+
+{<span class="var">filteredProjects</span>.<span class="fn">map</span>((<span class="var">project</span>) =&gt; (...))}</pre>
+  <p>The filter only re-runs when <code>projects</code> or <code>selectedOption</code> changes. Type in some other input on the page? Filter doesn't re-run.</p>
+
+  <h3>Another spot — the Dashboard</h3>
+  <span class="file-path">client/src/pages/<span>Dashboard.jsx</span></span>
+  <p>I hard-coded the dashboard numbers (<code>$2,500,000</code>, <code>44</code>, <code>22</code>). Those should come from real data:</p>
+<pre><span class="kw">const</span> <span class="var">totalSpent</span> = <span class="fn">useMemo</span>(
+  () =&gt; <span class="var">projects</span>.<span class="fn">reduce</span>((<span class="var">sum</span>, <span class="var">p</span>) =&gt; <span class="var">sum</span> + <span class="var">p</span>.<span class="var">budget</span>, <span class="str">0</span>),
+  [<span class="var">projects</span>]
+);
+
+<span class="kw">const</span> <span class="var">ongoingTasks</span> = <span class="fn">useMemo</span>(
+  () =&gt; <span class="var">projects</span>
+    .<span class="fn">flatMap</span>((<span class="var">p</span>) =&gt; <span class="var">p</span>.<span class="var">tasks</span>)
+    .<span class="fn">filter</span>((<span class="var">t</span>) =&gt; <span class="var">t</span>.<span class="var">status</span> === <span class="str">'Ongoing'</span>).<span class="var">length</span>,
+  [<span class="var">projects</span>]
+);</pre>
+
+  <div class="speaker-notes">
+    <h4>Talking points</h4>
+    <ul>
+      <li>Don't memoize everything. Profile first. <code>useMemo</code> has its own overhead — it's only a win when the calculation is genuinely expensive.</li>
+      <li>The dependency array works just like <code>useEffect</code> — include every value you read inside the function.</li>
+      <li>Common rule: memoize <em>computed</em> values (sort, filter, reduce), not cheap ones (string concat, basic math).</li>
+      <li>If anyone asks "should I memo every array I create?" — no. React 19's compiler will handle a lot of this automatically.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ========== useCallback ========== -->
+<section class="panel" id="useCallback">
+  <h2><span class="hook-name">useCallback</span></h2>
+  <p class="tagline">Like useMemo, but for functions instead of values.</p>
+
+  <p>Every render creates new function references. Usually harmless — but if you pass a function to a child that's wrapped in <code>React.memo</code>, the child re-renders anyway because the function "changed." <code>useCallback</code> keeps the same function reference between renders unless its dependencies change.</p>
+
+  <pre><span class="kw">const</span> <span class="fn">handleClick</span> = <span class="fn">useCallback</span>(() =&gt; {
+  <span class="fn">doSomething</span>(<span class="var">x</span>);
+}, [<span class="var">x</span>]);</pre>
+
+  <h3>What I actually did</h3>
+  <span class="file-path">client/src/components/<span>ProjectEdit.jsx</span></span>
+<pre><span class="kw">const</span> <span class="fn">handleDelete</span> = () =&gt; {
+  <span class="fn">dispatch</span>(<span class="fn">projectDelete</span>({ <span class="var">projectId</span>, <span class="var">email</span>: <span class="var">user</span>.<span class="var">email</span> }));
+  <span class="fn">navigate</span>(<span class="str">"/projects"</span>);
+};</pre>
+  <p>A new <code>handleDelete</code> function every render. Fine, because I'm not passing it to a memoized child — I'm using it on a button right there.</p>
+
+  <h3>When it would matter</h3>
+<pre><span class="kw">const</span> <span class="fn">handleDelete</span> = <span class="fn">useCallback</span>(() =&gt; {
+  <span class="fn">dispatch</span>(<span class="fn">projectDelete</span>({ <span class="var">projectId</span>, <span class="var">email</span>: <span class="var">user</span>.<span class="var">email</span> }));
+  <span class="fn">navigate</span>(<span class="str">"/projects"</span>);
+}, [<span class="var">projectId</span>, <span class="var">user</span>.<span class="var">email</span>]);
+
+&lt;<span class="kw">DeleteButton</span> onDelete={<span class="fn">handleDelete</span>} /&gt;
+<span class="com">// where DeleteButton is wrapped in React.memo</span></pre>
+  <p>Now <code>DeleteButton</code> only re-renders when the <em>actual</em> delete behavior changes, not every time something else in the parent updates.</p>
+
+  <h3>The honest take</h3>
+  <div class="card">
+    <div class="card-label">When to actually reach for useCallback</div>
+    <p style="margin:0;"><strong>1.</strong> You're passing the function to a child wrapped in <code>React.memo</code>.<br>
+    <strong>2.</strong> The function is a dependency of another hook (like <code>useEffect</code>) and you don't want that hook re-running every render.<br>
+    <strong>3.</strong> You've measured a performance issue and traced it to function identity.</p>
+    <p style="margin:14px 0 0; font-size:14px; color:var(--text-dim);">If none of those apply: don't bother. It adds cognitive cost for no benefit.</p>
+  </div>
+
+  <div class="speaker-notes">
+    <h4>Talking points</h4>
+    <ul>
+      <li><code>useCallback(fn, deps)</code> is just shorthand for <code>useMemo(() => fn, deps)</code>. Same idea, different shape.</li>
+      <li>Most projects overuse <code>useCallback</code>. Wrapping every function in it isn't free.</li>
+      <li>Pair it with <code>React.memo</code> on the child or it does literally nothing.</li>
+      <li>Same with <code>useMemo</code> — these are surgical tools, not blanket "make my app faster" hooks.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ========== CUSTOM HOOKS ========== -->
+<section class="panel" id="custom">
+  <h2>Custom hooks</h2>
+  <p class="tagline">Extract repeated hook logic into a function you can reuse.</p>
+
+  <p>If you're writing the same <code>useState</code> + <code>useEffect</code> dance in multiple components, pull it into a custom hook. Custom hooks are just functions whose names start with <code>use</code>. They can call other hooks. They follow the same rules.</p>
+
+  <pre><span class="kw">function</span> <span class="fn">useToggle</span>(<span class="var">initial</span> = <span class="kw">false</span>) {
+  <span class="kw">const</span> [<span class="var">value</span>, <span class="fn">setValue</span>] = <span class="fn">useState</span>(<span class="var">initial</span>);
+  <span class="kw">const</span> <span class="fn">toggle</span> = () =&gt; <span class="fn">setValue</span>(<span class="var">v</span> =&gt; !<span class="var">v</span>);
+  <span class="kw">return</span> [<span class="var">value</span>, <span class="fn">toggle</span>];
+}</pre>
+
+  <h3>The pattern I repeat all over my project</h3>
+  <p>In <code>NewProject.jsx</code>, <code>ProjectEdit.jsx</code>, <code>NewTask.jsx</code>, <code>TaskEdit.jsx</code>, and a few more, I have the same thing:</p>
+<pre><span class="kw">const</span> [<span class="var">showModal</span>, <span class="fn">setShowModal</span>] = <span class="fn">useState</span>(<span class="kw">false</span>);
+
+<span class="com">// and then</span>
+&lt;<span class="kw">button</span> onClick={() =&gt; <span class="fn">setShowModal</span>(!<span class="var">showModal</span>)}&gt;...&lt;/<span class="kw">button</span>&gt;</pre>
+
+  <h3>Extracted into a custom hook</h3>
+<pre><span class="com">// hooks/useToggle.js</span>
+<span class="kw">import</span> { <span class="var">useState</span>, <span class="var">useCallback</span> } <span class="kw">from</span> <span class="str">"react"</span>;
+
+<span class="kw">export function</span> <span class="fn">useToggle</span>(<span class="var">initial</span> = <span class="kw">false</span>) {
+  <span class="kw">const</span> [<span class="var">value</span>, <span class="fn">setValue</span>] = <span class="fn">useState</span>(<span class="var">initial</span>);
+  <span class="kw">const</span> <span class="fn">toggle</span> = <span class="fn">useCallback</span>(() =&gt; <span class="fn">setValue</span>(<span class="var">v</span> =&gt; !<span class="var">v</span>), []);
+  <span class="kw">return</span> [<span class="var">value</span>, <span class="fn">toggle</span>, <span class="fn">setValue</span>];
+}
+
+<span class="com">// in NewProject.jsx</span>
+<span class="kw">const</span> [<span class="var">showModal</span>, <span class="fn">toggleModal</span>] = <span class="fn">useToggle</span>(<span class="kw">false</span>);
+&lt;<span class="kw">button</span> onClick={<span class="fn">toggleModal</span>}&gt;...&lt;/<span class="kw">button</span>&gt;</pre>
+
+  <h3>Live demo — two toggles, one hook</h3>
+  <div class="card">
+    <div class="card-label live">Both buttons use the same useToggle logic</div>
+    <div class="demo">
+      <div style="display:flex; gap:40px; justify-content:center; flex-wrap:wrap;">
+        <div>
+          <div class="toggle-display off" id="t1">modal A: false</div>
+          <br>
+          <button class="btn btn-primary" id="t1Btn">toggle A</button>
+        </div>
+        <div>
+          <div class="toggle-display off" id="t2">modal B: false</div>
+          <br>
+          <button class="btn btn-primary" id="t2Btn">toggle B</button>
+        </div>
+      </div>
+      <p style="font-size:13px; color:var(--text-dim); margin-top:24px;">Each call to <code>useToggle()</code> creates its own independent state. Same logic, two instances.</p>
+    </div>
+  </div>
+
+  <h3>Another candidate from my project — the form pattern</h3>
+  <p>I have this pattern in every form (login, new project, edit project, new task, edit task):</p>
+<pre><span class="kw">const</span> [<span class="var">form</span>, <span class="fn">setForm</span>] = <span class="fn">useState</span>(<span class="var">initial</span>);
+
+<span class="kw">const</span> <span class="fn">handleChange</span> = (<span class="var">e</span>) =&gt; {
+  <span class="fn">setForm</span>({ ...<span class="var">form</span>, [<span class="var">e</span>.<span class="var">target</span>.<span class="var">name</span>]: <span class="var">e</span>.<span class="var">target</span>.<span class="var">value</span> });
+};</pre>
+
+  <p>Could become:</p>
+<pre><span class="kw">function</span> <span class="fn">useForm</span>(<span class="var">initial</span>) {
+  <span class="kw">const</span> [<span class="var">values</span>, <span class="fn">setValues</span>] = <span class="fn">useState</span>(<span class="var">initial</span>);
+  <span class="kw">const</span> <span class="fn">handleChange</span> = (<span class="var">e</span>) =&gt;
+    <span class="fn">setValues</span>(<span class="var">v</span> =&gt; ({ ...<span class="var">v</span>, [<span class="var">e</span>.<span class="var">target</span>.<span class="var">name</span>]: <span class="var">e</span>.<span class="var">target</span>.<span class="var">value</span> }));
+  <span class="kw">const</span> <span class="fn">reset</span> = () =&gt; <span class="fn">setValues</span>(<span class="var">initial</span>);
+  <span class="kw">return</span> { <span class="var">values</span>, <span class="fn">handleChange</span>, <span class="fn">reset</span>, <span class="fn">setValues</span> };
+}
+
+<span class="com">// in Login.jsx — way less code</span>
+<span class="kw">const</span> { <span class="var">values</span>, <span class="fn">handleChange</span> } = <span class="fn">useForm</span>({ <span class="var">email</span>: <span class="str">""</span>, <span class="var">password</span>: <span class="str">""</span> });</pre>
+
+  <div class="speaker-notes">
+    <h4>Talking points — this is the capstone</h4>
+    <ul>
+      <li>Custom hooks are how you scale React knowledge. Once you have the building blocks, you compose them into your own patterns.</li>
+      <li>The "use" prefix is mandatory — the linter uses it to know that the rules of hooks apply.</li>
+      <li>Custom hooks don't share state. Each component that calls <code>useToggle()</code> gets its own state. That's a feature.</li>
+      <li>Look at the React ecosystem — almost every library exposes custom hooks: <code>useQuery</code>, <code>useForm</code>, <code>useNavigate</code>. Now you know how to write your own.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ========== ROUTER ========== -->
+<section class="panel" id="router">
+  <h2>Router hooks</h2>
+  <p class="tagline">Same hook pattern, but they come from React Router instead of React itself.</p>
+
+  <p>The library uses hooks to give you access to URL stuff from inside your components. Two I used a lot:</p>
+
+  <h3><code>useParams</code> — read values from the URL</h3>
+  <span class="file-path">client/src/pages/<span>ProjectDetail.jsx</span></span>
+<pre><span class="com">// route is defined as "/projects/:projectId"</span>
+<span class="kw">const</span> { <span class="var">projectId</span> } = <span class="fn">useParams</span>();
+
+<span class="com">// now I can use projectId to fetch the right project</span>
+<span class="fn">dispatch</span>(<span class="fn">projectGetOne</span>(<span class="var">projectId</span>));</pre>
+  <p>If the URL is <code>/projects/abc123</code>, then <code>projectId</code> is the string <code>"abc123"</code>. The route definition uses <code>:projectId</code> as a placeholder, and the hook pulls it out.</p>
+
+  <h3><code>useNavigate</code> — change the URL programmatically</h3>
+  <span class="file-path">client/src/pages/<span>Login.jsx</span></span>
+<pre><span class="kw">const</span> <span class="var">navigate</span> = <span class="fn">useNavigate</span>();
+
+<span class="fn">useEffect</span>(() =&gt; {
+  <span class="kw">if</span> (<span class="var">isLoggedIn</span>) {
+    <span class="fn">navigate</span>(<span class="str">"/"</span>);
+  }
+}, [<span class="var">isLoggedIn</span>]);</pre>
+  <p>Sometimes you don't want a link — you want to send the user somewhere as a result of an action. After a successful login, after a form submits, after they delete something. <code>navigate("/path")</code> is the function for that.</p>
+
+  <div class="speaker-notes">
+    <h4>Talking points</h4>
+    <ul>
+      <li>These follow the same rules as React's built-in hooks — top of the function, not inside loops or conditions.</li>
+      <li><code>useParams</code> only works inside a component that's rendered by a Route with placeholders.</li>
+      <li><code>useNavigate</code> replaced the older <code>useHistory</code> hook in React Router v6.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ========== REDUX ========== -->
+<section class="panel" id="redux">
+  <h2>Redux hooks</h2>
+  <p class="tagline">How my components read from and write to the global store.</p>
+
+  <p>Redux holds shared state — stuff a bunch of components all need to see, like the logged-in user. Two hooks connect components to it:</p>
+
+  <h3><code>useSelector</code> — read from the store</h3>
+  <span class="file-path">client/src/<span>App.jsx</span></span>
+<pre><span class="kw">const</span> { <span class="var">isLoggedIn</span> } = <span class="fn">useSelector</span>((<span class="var">state</span>) =&gt; <span class="var">state</span>.<span class="var">auth</span>);
+<span class="kw">const</span> { <span class="var">user</span> } = <span class="fn">useSelector</span>((<span class="var">state</span>) =&gt; <span class="var">state</span>.<span class="var">auth</span>);</pre>
+  <p>You hand it a function that picks out the slice of state you care about. If that slice changes, your component re-renders. The whole component tree could change — you only re-render when <em>your slice</em> changes.</p>
+
+  <h3><code>useDispatch</code> — send actions to the store</h3>
+  <span class="file-path">client/src/pages/<span>Login.jsx</span></span>
+<pre><span class="kw">const</span> <span class="var">dispatch</span> = <span class="fn">useDispatch</span>();
+
+<span class="com">// when the form submits</span>
+<span class="fn">dispatch</span>(<span class="fn">authLogin</span>({ ...<span class="var">loginForm</span> }));</pre>
+  <p><code>dispatch</code> is a function. You call it with an action (here, <code>authLogin</code> with the form data). The action gets handled by a reducer, the store updates, and any component that's selecting that slice re-renders.</p>
+
+  <h3>Both together — the App component</h3>
+<pre><span class="kw">const</span> <span class="var">dispatch</span> = <span class="fn">useDispatch</span>();
+<span class="kw">const</span> { <span class="var">user</span> } = <span class="fn">useSelector</span>((<span class="var">state</span>) =&gt; <span class="var">state</span>.<span class="var">auth</span>);
+
+<span class="fn">useEffect</span>(() =&gt; {
+  <span class="kw">if</span> (<span class="var">user</span>.<span class="var">email</span> !== <span class="str">""</span>) {
+    <span class="fn">dispatch</span>(<span class="fn">projectGetMany</span>(<span class="var">user</span>.<span class="var">email</span>));
+  }
+}, [<span class="var">user</span>]);</pre>
+  <p>Read the user from Redux. When the user changes (login or logout), fetch their projects. Three hooks working together: <code>useSelector</code> reads, <code>useEffect</code> watches, <code>useDispatch</code> writes.</p>
+
+  <div class="speaker-notes">
+    <h4>Talking points</h4>
+    <ul>
+      <li>Redux hooks come from <code>react-redux</code>, the bindings library — not Redux itself.</li>
+      <li>You can have many <code>useSelector</code> calls in one component, each selecting a different slice.</li>
+      <li>The selector function runs after every action — keep it cheap. Don't do heavy filtering or mapping inside it.</li>
+      <li>If anyone asks "why not just useState?" — useState is per-component. Redux is for state that lots of components need to share.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ========== RULES ========== -->
+<section class="panel" id="rules">
+  <h2>Rules of hooks</h2>
+  <p class="tagline">Two rules. That's the whole list.</p>
+
+  <div class="rule">
+    <div class="rule-num">1</div>
+    <div class="rule-content">
+      <h4>Only call hooks at the top level</h4>
+      <p>Not inside loops, conditions, or nested functions. React relies on the call order to keep track of which state is which.</p>
+    </div>
+  </div>
+
+  <div class="rule">
+    <div class="rule-num">2</div>
+    <div class="rule-content">
+      <h4>Only call hooks from React functions</h4>
+      <p>From a function component, or from a custom hook (a function whose name also starts with <code>use</code>). Not from plain JavaScript functions.</p>
+    </div>
+  </div>
+
+  <h3>Why?</h3>
+  <p>React identifies your hooks by the order they're called. First <code>useState</code> = the first one. Second <code>useState</code> = the second one. If you put one inside an <code>if</code>, sometimes it's there and sometimes it isn't, and React loses track of which state goes with which call.</p>
+
+  <pre><span class="com">// 🚫 bad</span>
+<span class="kw">if</span> (<span class="var">isLoggedIn</span>) {
+  <span class="kw">const</span> [<span class="var">name</span>, <span class="fn">setName</span>] = <span class="fn">useState</span>(<span class="str">""</span>);
+}
+
+<span class="com">// ✓ good</span>
+<span class="kw">const</span> [<span class="var">name</span>, <span class="fn">setName</span>] = <span class="fn">useState</span>(<span class="str">""</span>);
+<span class="kw">if</span> (<span class="var">isLoggedIn</span>) {
+  <span class="com">// use name here</span>
+}</pre>
+
+  <hr class="divider">
+
+  <h2 style="font-size:36px;">Recap</h2>
+  <ul style="list-style:none; padding:0; max-width:720px;">
+    <li style="padding:12px 0; border-bottom:1px solid var(--border-soft);"><code>useState</code> — remember things between renders</li>
+    <li style="padding:12px 0; border-bottom:1px solid var(--border-soft);"><code>useEffect</code> — do things outside of rendering, react to changes</li>
+    <li style="padding:12px 0; border-bottom:1px solid var(--border-soft);"><code>useContext</code> — share data without prop drilling</li>
+    <li style="padding:12px 0; border-bottom:1px solid var(--border-soft);"><code>useReducer</code> — useState for state with multiple moving parts</li>
+    <li style="padding:12px 0; border-bottom:1px solid var(--border-soft);"><code>useRef</code> — DOM refs and values that don't trigger renders</li>
+    <li style="padding:12px 0; border-bottom:1px solid var(--border-soft);"><code>useMemo</code> — cache expensive calculations</li>
+    <li style="padding:12px 0; border-bottom:1px solid var(--border-soft);"><code>useCallback</code> — cache function references</li>
+    <li style="padding:12px 0; border-bottom:1px solid var(--border-soft);"><code>useParams</code> / <code>useNavigate</code> — read and change the URL</li>
+    <li style="padding:12px 0; border-bottom:1px solid var(--border-soft);"><code>useSelector</code> / <code>useDispatch</code> — read and write Redux state</li>
+    <li style="padding:12px 0; border-bottom:1px solid var(--border-soft);"><strong>Custom hooks</strong> — package your own patterns</li>
+    <li style="padding:12px 0;">All of them follow the same two rules. All of them start with <code>use</code>.</li>
+  </ul>
+
+  <div class="speaker-notes">
+    <h4>Closing notes</h4>
+    <ul>
+      <li>Thank the class. Open it up for questions.</li>
+      <li>If you don't know an answer, it's fine to say "I'd have to check" — nobody knows every edge case.</li>
+      <li>Common question: "what about useRef / useMemo / useContext / useReducer?" — those exist, same pattern, beyond this talk.</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Built for the teach-back · <span>diana</span> · React hooks
+</footer>
+
+<script>
+  // Tab switching
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.panel');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.tab).classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  // Speaker notes toggle
+  document.getElementById('notesToggle').addEventListener('change', (e) => {
+    document.body.classList.toggle('show-notes', e.target.checked);
+  });
+
+  // useState demo — counter
+  let counter = 0;
+  function render() {
+    document.getElementById('counterValue').textContent = counter;
+  }
+
+  // useState demo — toggle
+  let showModal = false;
+  const toggleDisplay = document.getElementById('toggleDisplay');
+  document.getElementById('toggleBtn').addEventListener('click', () => {
+    showModal = !showModal;
+    toggleDisplay.textContent = 'showModal: ' + showModal;
+    toggleDisplay.classList.toggle('on', showModal);
+    toggleDisplay.classList.toggle('off', !showModal);
+  });
+
+  // useEffect demo — three effect simulator
+  const log = document.getElementById('effectLog');
+  const input = document.getElementById('effectInput');
+  let inputValue = '';
+  let renderCount = 0;
+  let prevInput = null; // track for "dependency changed" semantics
+
+  function addEntry(type, text) {
+    const e = document.createElement('div');
+    e.className = 'entry ' + type;
+    e.textContent = text;
+    log.appendChild(e);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function simulateRender() {
+    renderCount++;
+    addEntry('render', 'render #' + renderCount);
+
+    // 1. no array — every render
+    addEntry('every', '  effect (no deps) → fired');
+
+    // 2. empty array — only first time
+    if (renderCount === 1) {
+      addEntry('mount', '  effect ([]) → fired (mount)');
+    }
+
+    // 3. dependency on input — only when input changed
+    if (prevInput === null || prevInput !== inputValue) {
+      addEntry('dep', '  effect ([input]) → fired (input changed to "' + inputValue + '")');
+      prevInput = inputValue;
+    }
+  }
+
+  input.addEventListener('input', (e) => {
+    inputValue = e.target.value;
+    simulateRender();
+  });
+
+  document.getElementById('forceRender').addEventListener('click', simulateRender);
+  document.getElementById('clearLog').addEventListener('click', () => {
+    log.innerHTML = '';
+    renderCount = 0;
+    prevInput = null;
+    inputValue = input.value;
+  });
+
+  // initial mount render
+  simulateRender();
+
+  // ===== useReducer demo =====
+  const initialReducerState = { count: 0 };
+  function counterReducer(state, action) {
+    switch (action.type) {
+      case 'INCREMENT': return { count: state.count + 1 };
+      case 'DECREMENT': return { count: state.count - 1 };
+      case 'RESET':     return { count: 0 };
+      default: return state;
+    }
+  }
+  let reducerState = { ...initialReducerState };
+  const reducerValue = document.getElementById('reducerValue');
+  const reducerLog = document.getElementById('reducerLog');
+  function dispatchAction(action) {
+    reducerState = counterReducer(reducerState, action);
+    reducerValue.textContent = reducerState.count;
+    const e = document.createElement('div');
+    e.className = 'entry dep';
+    e.textContent = "dispatch({ type: '" + action.type + "' }) → count: " + reducerState.count;
+    reducerLog.appendChild(e);
+    reducerLog.scrollTop = reducerLog.scrollHeight;
+  }
+  document.getElementById('rInc').addEventListener('click', () => dispatchAction({ type: 'INCREMENT' }));
+  document.getElementById('rDec').addEventListener('click', () => dispatchAction({ type: 'DECREMENT' }));
+  document.getElementById('rReset').addEventListener('click', () => dispatchAction({ type: 'RESET' }));
+
+  // ===== useRef demo =====
+  const refInput = document.getElementById('refInput');
+  document.getElementById('focusBtn').addEventListener('click', () => {
+    refInput.focus();
+    refInput.placeholder = 'focused!';
+  });
+  document.getElementById('clearInput').addEventListener('click', () => {
+    refInput.value = '';
+    refInput.placeholder = 'not focused yet';
+  });
+
+  // ===== Custom hooks demo — two independent toggles =====
+  function makeToggle(displayEl, initial = false) {
+    let value = initial;
+    return () => {
+      value = !value;
+      displayEl.textContent = displayEl.id === 't1' ? 'modal A: ' + value : 'modal B: ' + value;
+      displayEl.classList.toggle('on', value);
+      displayEl.classList.toggle('off', !value);
+    };
+  }
+  const t1 = makeToggle(document.getElementById('t1'));
+  const t2 = makeToggle(document.getElementById('t2'));
+  document.getElementById('t1Btn').addEventListener('click', t1);
+  document.getElementById('t2Btn').addEventListener('click', t2);
+</script>
+
+</body>
+</html>

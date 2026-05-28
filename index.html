@@ -4,6 +4,11 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>React Hooks — Teach-Back</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -552,6 +557,41 @@
       <li>If anyone asks "why hooks instead of classes?" — they let you reuse stateful logic, the code is shorter, and you don't have to worry about <code>this</code>.</li>
     </ul>
   </div>
+
+  <h3>One thing before we dive in — imports</h3>
+  <p>Hooks aren't global. You import them from wherever they live. Here's the cheat sheet for everything in this talk:</p>
+
+  <div class="split">
+    <div class="card">
+      <div class="card-label">From React itself</div>
+<pre><span class="kw">import</span> {
+  <span class="var">useState</span>,
+  <span class="var">useEffect</span>,
+  <span class="var">useContext</span>,
+  <span class="var">useReducer</span>,
+  <span class="var">useRef</span>,
+  <span class="var">useMemo</span>,
+  <span class="var">useCallback</span>,
+  <span class="var">createContext</span>
+} <span class="kw">from</span> <span class="str">"react"</span>;</pre>
+    </div>
+    <div class="card">
+      <div class="card-label">From libraries</div>
+<pre><span class="com">// React Router</span>
+<span class="kw">import</span> { <span class="var">useParams</span>, <span class="var">useNavigate</span> }
+  <span class="kw">from</span> <span class="str">"react-router-dom"</span>;
+
+<span class="com">// React Redux</span>
+<span class="kw">import</span> { <span class="var">useSelector</span>, <span class="var">useDispatch</span> }
+  <span class="kw">from</span> <span class="str">"react-redux"</span>;
+
+<span class="com">// Your own custom hooks</span>
+<span class="kw">import</span> { <span class="var">useToggle</span> }
+  <span class="kw">from</span> <span class="str">"./hooks/useToggle"</span>;</pre>
+    </div>
+  </div>
+
+  <p>Only import the ones you actually use in that file. If you import <code>useEffect</code> and never call it, the linter will complain.</p>
 </section>
 
 <!-- ========== useState ========== -->
@@ -561,7 +601,9 @@
 
   <p>You give it a starting value. It gives you back the current value plus a function to update it. When you call the update function, React re-renders the component with the new value.</p>
 
-  <pre><span class="kw">const</span> [<span class="var">value</span>, <span class="fn">setValue</span>] = <span class="fn">useState</span>(<span class="str">initialValue</span>);</pre>
+  <pre><span class="kw">import</span> { <span class="var">useState</span> } <span class="kw">from</span> <span class="str">"react"</span>;
+
+<span class="kw">const</span> [<span class="var">value</span>, <span class="fn">setValue</span>] = <span class="fn">useState</span>(<span class="str">initialValue</span>);</pre>
 
   <h3>Live demo</h3>
   <div class="split">
@@ -642,7 +684,9 @@
 
   <p>Rendering should be predictable. Anything that <em>isn't</em> just turning state into UI — calling an API, reading from storage, navigating — goes inside <code>useEffect</code>.</p>
 
-  <pre><span class="fn">useEffect</span>(() =&gt; {
+  <pre><span class="kw">import</span> { <span class="var">useEffect</span> } <span class="kw">from</span> <span class="str">"react"</span>;
+
+<span class="fn">useEffect</span>(() =&gt; {
   <span class="com">// the effect</span>
 }, [<span class="var">dependencies</span>]);</pre>
 
@@ -740,7 +784,9 @@
 
   <p>When a lot of components need the same data — the logged-in user, a theme, a language preference — you can stop drilling it through every prop and put it in a Context instead. Any component inside the Provider can grab it directly.</p>
 
-  <pre><span class="kw">const</span> <span class="var">UserContext</span> = <span class="fn">createContext</span>();
+  <pre><span class="kw">import</span> { <span class="var">createContext</span>, <span class="var">useContext</span> } <span class="kw">from</span> <span class="str">"react"</span>;
+
+<span class="kw">const</span> <span class="var">UserContext</span> = <span class="fn">createContext</span>();
 
 <span class="com">// at the top of the tree</span>
 &lt;<span class="var">UserContext</span>.<span class="var">Provider</span> value={<span class="var">user</span>}&gt;
@@ -845,7 +891,9 @@
 
   <p>When state gets complex — multiple fields, nested objects, related changes — <code>useReducer</code> moves the update logic out of your JSX and into one place. You <em>dispatch actions</em> and a <em>reducer function</em> decides how state changes.</p>
 
-  <pre><span class="kw">const</span> [<span class="var">state</span>, <span class="var">dispatch</span>] = <span class="fn">useReducer</span>(<span class="var">reducer</span>, <span class="var">initialState</span>);
+  <pre><span class="kw">import</span> { <span class="var">useReducer</span> } <span class="kw">from</span> <span class="str">"react"</span>;
+
+<span class="kw">const</span> [<span class="var">state</span>, <span class="var">dispatch</span>] = <span class="fn">useReducer</span>(<span class="var">reducer</span>, <span class="var">initialState</span>);
 
 <span class="kw">function</span> <span class="fn">reducer</span>(<span class="var">state</span>, <span class="var">action</span>) {
   <span class="kw">switch</span> (<span class="var">action</span>.<span class="var">type</span>) {
@@ -941,7 +989,9 @@
 
   <p>Most of the time you want React to manage everything. But sometimes you need to talk to a DOM element directly — focus an input, scroll to a position, measure a div. <code>useRef</code> gives you a stable handle to it. The <code>.current</code> property is mutable and persists across renders.</p>
 
-  <pre><span class="kw">const</span> <span class="var">inputRef</span> = <span class="fn">useRef</span>(<span class="kw">null</span>);
+  <pre><span class="kw">import</span> { <span class="var">useRef</span> } <span class="kw">from</span> <span class="str">"react"</span>;
+
+<span class="kw">const</span> <span class="var">inputRef</span> = <span class="fn">useRef</span>(<span class="kw">null</span>);
 
 &lt;<span class="kw">input</span> ref={<span class="var">inputRef</span>} /&gt;
 
@@ -1016,7 +1066,9 @@
 
   <p>Every time a component renders, all the code in it runs. Usually fine. But if you've got something slow — sorting a big list, computing aggregates, filtering thousands of items — <code>useMemo</code> remembers the result and only re-runs the calculation when its inputs change.</p>
 
-  <pre><span class="kw">const</span> <span class="var">result</span> = <span class="fn">useMemo</span>(() =&gt; <span class="fn">expensiveCalc</span>(<span class="var">items</span>), [<span class="var">items</span>]);</pre>
+  <pre><span class="kw">import</span> { <span class="var">useMemo</span> } <span class="kw">from</span> <span class="str">"react"</span>;
+
+<span class="kw">const</span> <span class="var">result</span> = <span class="fn">useMemo</span>(() =&gt; <span class="fn">expensiveCalc</span>(<span class="var">items</span>), [<span class="var">items</span>]);</pre>
 
   <h3>What I actually did</h3>
   <span class="file-path">client/src/pages/<span>Tasks.jsx</span></span>
@@ -1068,7 +1120,9 @@
 
   <p>Every render creates new function references. Usually harmless — but if you pass a function to a child that's wrapped in <code>React.memo</code>, the child re-renders anyway because the function "changed." <code>useCallback</code> keeps the same function reference between renders unless its dependencies change.</p>
 
-  <pre><span class="kw">const</span> <span class="fn">handleClick</span> = <span class="fn">useCallback</span>(() =&gt; {
+  <pre><span class="kw">import</span> { <span class="var">useCallback</span> } <span class="kw">from</span> <span class="str">"react"</span>;
+
+<span class="kw">const</span> <span class="fn">handleClick</span> = <span class="fn">useCallback</span>(() =&gt; {
   <span class="fn">doSomething</span>(<span class="var">x</span>);
 }, [<span class="var">x</span>]);</pre>
 
@@ -1204,7 +1258,9 @@
 
   <h3><code>useParams</code> — read values from the URL</h3>
   <span class="file-path">client/src/pages/<span>ProjectDetail.jsx</span></span>
-<pre><span class="com">// route is defined as "/projects/:projectId"</span>
+<pre><span class="kw">import</span> { <span class="var">useParams</span> } <span class="kw">from</span> <span class="str">"react-router-dom"</span>;
+
+<span class="com">// route is defined as "/projects/:projectId"</span>
 <span class="kw">const</span> { <span class="var">projectId</span> } = <span class="fn">useParams</span>();
 
 <span class="com">// now I can use projectId to fetch the right project</span>
@@ -1213,7 +1269,9 @@
 
   <h3><code>useNavigate</code> — change the URL programmatically</h3>
   <span class="file-path">client/src/pages/<span>Login.jsx</span></span>
-<pre><span class="kw">const</span> <span class="var">navigate</span> = <span class="fn">useNavigate</span>();
+<pre><span class="kw">import</span> { <span class="var">useNavigate</span> } <span class="kw">from</span> <span class="str">"react-router-dom"</span>;
+
+<span class="kw">const</span> <span class="var">navigate</span> = <span class="fn">useNavigate</span>();
 
 <span class="fn">useEffect</span>(() =&gt; {
   <span class="kw">if</span> (<span class="var">isLoggedIn</span>) {
@@ -1241,13 +1299,17 @@
 
   <h3><code>useSelector</code> — read from the store</h3>
   <span class="file-path">client/src/<span>App.jsx</span></span>
-<pre><span class="kw">const</span> { <span class="var">isLoggedIn</span> } = <span class="fn">useSelector</span>((<span class="var">state</span>) =&gt; <span class="var">state</span>.<span class="var">auth</span>);
+<pre><span class="kw">import</span> { <span class="var">useSelector</span> } <span class="kw">from</span> <span class="str">"react-redux"</span>;
+
+<span class="kw">const</span> { <span class="var">isLoggedIn</span> } = <span class="fn">useSelector</span>((<span class="var">state</span>) =&gt; <span class="var">state</span>.<span class="var">auth</span>);
 <span class="kw">const</span> { <span class="var">user</span> } = <span class="fn">useSelector</span>((<span class="var">state</span>) =&gt; <span class="var">state</span>.<span class="var">auth</span>);</pre>
   <p>You hand it a function that picks out the slice of state you care about. If that slice changes, your component re-renders. The whole component tree could change — you only re-render when <em>your slice</em> changes.</p>
 
   <h3><code>useDispatch</code> — send actions to the store</h3>
   <span class="file-path">client/src/pages/<span>Login.jsx</span></span>
-<pre><span class="kw">const</span> <span class="var">dispatch</span> = <span class="fn">useDispatch</span>();
+<pre><span class="kw">import</span> { <span class="var">useDispatch</span> } <span class="kw">from</span> <span class="str">"react-redux"</span>;
+
+<span class="kw">const</span> <span class="var">dispatch</span> = <span class="fn">useDispatch</span>();
 
 <span class="com">// when the form submits</span>
 <span class="fn">dispatch</span>(<span class="fn">authLogin</span>({ ...<span class="var">loginForm</span> }));</pre>
